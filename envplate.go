@@ -15,15 +15,20 @@ const (
 )
 
 type Handler struct {
+	Prefix string
 	Backup bool
 	DryRun bool
 	Strict bool
 }
 
-var exp = regexp.MustCompile(`(\\*)\$\{(.+?)(?:(\:\-)(.*?))?\}`)
+func compileRegex(h *Handler) *regexp.Regexp {
+	if h.Prefix != "" {
+		return regexp.MustCompile(`(\\*)\$\{` + h.Prefix + `(.+?)(?:(\:\-)(.*?))?\}`)
+	}
+	return regexp.MustCompile(`(\\*)\$\{(.+?)(?:(\:\-)(.*?))?\}`)
+}
 
 func (h *Handler) Apply(globs []string) error {
-
 	matches := false
 
 	for _, pattern := range globs {
@@ -59,7 +64,7 @@ func (h *Handler) Apply(globs []string) error {
 }
 
 func (h *Handler) parse(file string) error {
-
+	var exp = compileRegex(h)
 	env := envmap.Import()
 	content, err := ioutil.ReadFile(file)
 
@@ -74,7 +79,7 @@ func (h *Handler) parse(file string) error {
 	parsed := exp.ReplaceAllStringFunc(string(content), func(match string) string {
 
 		var (
-			esc, key, sep, def = capture(match)
+			esc, key, sep, def = capture(exp, h.Prefix, match)
 			value, keyDefined  = env[key]
 		)
 
@@ -152,15 +157,16 @@ func (h *Handler) parse(file string) error {
 
 }
 
-func capture(s string) (esc, key, sep, def string) {
-
+func capture(exp *regexp.Regexp, prefix string, s string) (esc, key, sep, def string) {
 	matches := exp.FindStringSubmatch(s)
 
 	esc = matches[1]
 	key = matches[2]
 	sep = matches[3]
 	def = matches[4]
-
+	if prefix != "" {
+		key = prefix + key
+	}
 	return esc, key, sep, def
 
 }

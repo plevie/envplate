@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/kreuzwerker/envplate",
+	"ImportPath": "github.com/plevie/envplate",
 	"GoVersion": "go1.5.3",
 	"Deps": [
 		{

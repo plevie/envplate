@@ -3,6 +3,7 @@ package envplate
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -65,7 +66,7 @@ func TestCapture(t *testing.T) {
 
 	for _, tt := range tt {
 
-		e, v, s, d := capture(tt.in)
+		e, v, s, d := capture(regexp.MustCompile(`(\\*)\$\{(.+?)(?:(\:\-)(.*?))?\}`), "", tt.in)
 
 		assert.Equal(tt.e, e)
 		assert.Equal(tt.v, v)
@@ -108,6 +109,45 @@ Database2=db.example.com
 Database3=$NOT_A_VARIABLE
 Database4=db2.example.com
 Database5=db.example.com
+`, raw())
+
+	})
+
+}
+
+func TestPrefixDryRun(t *testing.T) {
+
+	assert := assert.New(t)
+	handler := &Handler{
+		DryRun: true,
+		Prefix: "PREFIX_",
+	}
+
+	var (
+		file = "test/template5.txt"
+	)
+
+	_redirect_logs(func(logs func() string, raw func() string) {
+
+		err := handler.parse(file)
+		assert.NoError(err)
+
+		assert.Equal(`Database1=${DATABASE}
+Mode=${PREFIX_MODE}
+Null=${NULL}
+Database2=${PREFIX_DATABASE}
+Database3=$NOT_A_VARIABLE
+Database4=${ANOTHER_DATABASE:-db2.example.com}
+Database5=${DATABASE:-db2.example.com}
+`, _read(t, file))
+
+		assert.Equal(`Database1=${DATABASE}
+Mode=debug_prefixed
+Null=${NULL}
+Database2=db.example.com_prefixed
+Database3=$NOT_A_VARIABLE
+Database4=${ANOTHER_DATABASE:-db2.example.com}
+Database5=${DATABASE:-db2.example.com}
 `, raw())
 
 	})
