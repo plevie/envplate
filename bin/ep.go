@@ -8,7 +8,7 @@ import (
 
 	"github.com/plevie/envplate"
 	"github.com/spf13/cobra"
-	"github.com/yawn/doubledash" 
+	"github.com/yawn/doubledash"
 )
 
 var (
@@ -39,7 +39,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 
 			var h = envplate.Handler{
-				Prefix: *prefix
+				Prefix: *prefix,
 				Backup: *backup,
 				DryRun: *dryRun,
 				Strict: *strict,
@@ -65,7 +65,7 @@ func main() {
 	}
 
 	// flag parsing
-	prefix = root.Flags().StringP("prefix", "p", false, "Only preplace env vars starting with prefix")
+	prefix = root.Flags().StringP("prefix", "p", "", "Only preplace env vars starting with prefix")
 	backup = root.Flags().BoolP("backup", "b", false, "Create a backup file when using inline mode")
 	dryRun = root.Flags().BoolP("dry-run", "d", false, "Dry-run - output templates to stdout instead of inline replacement")
 	strict = root.Flags().BoolP("strict", "s", false, "Strict-mode - fail when falling back on defaults")
