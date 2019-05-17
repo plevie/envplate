@@ -1,7 +1,7 @@
 # Envplate
 
 [![Build Status](https://travis-ci.org/kreuzwerker/envplate.svg)](https://travis-ci.org/kreuzwerker/envplate)
-[![DepShield Badge](https://depshield.sonatype.org/badges/owner/repository/depshield.svg)](https://depshield.github.io)
+[![DepShield Badge](https://depshield.sonatype.org/badges/plevie/envplate/depshield.svg)](https://depshield.github.io)
 
 
 Trivial templating for configuration files using environment keys. References to such keys are declared in arbitrary config files either as:
